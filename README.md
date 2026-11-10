@@ -9,6 +9,29 @@ The model is the Glosten-Milgrom adverse-selection model, which is established t
 project's value is a careful, tested implementation and an honest account of what it does and
 does not show. The full definition is in [`SPEC.md`](SPEC.md).
 
+## What it shows
+
+An asset is worth 0 or 100. Each trader is informed with probability 20% (and trades the right
+way) or flips a coin. After every trade the game updates the probability the asset is worth 100
+using Bayes' rule, and the break-even bid and ask move with it. For example, after one BUY the
+break-even ask rises from 60 to 69.23.
+
+Because ten trades is a tiny sample, **realised profit is mostly luck**. The standard deviation
+of one round's profit is about 123 points, while the best simple strategy's expected edge is
+about +13 points per round. So the game scores you on expected edge, shows the luck separately,
+and tells you which is which.
+
+**Checked three ways** (see `SPEC.md` section 10):
+
+| Check | What it establishes |
+|---|---|
+| 42 automated tests, including 16 acceptance tests specified in `SPEC.md` before the code was written | The maths, routing, settlement and leakage rules behave as specified |
+| Exact enumeration of all 2 x 1,024 possible rounds | Expected profit equals expected edge exactly, for the tested strategies |
+| Independent re-derivation with exact fractions (`tests/test_independent.py`), reproduced separately by another reviewer | The headline figures, for example +13.1515 per round for quoting one tick inside the rival |
+
+An earlier set of figures was wrong by about 0.8 per round because of floating-point rounding in
+a throwaway script. The exact calculation caught it, and `SPEC.md` records the correction.
+
 ## Run it (Mac)
 
 ```bash
@@ -16,7 +39,7 @@ cd market-makers-dilemma
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pytest -v              # runs the acceptance tests (about 35 seconds)
+pytest -v              # runs all 42 tests (about a minute)
 streamlit run app.py   # opens the game in your browser
 ```
 
