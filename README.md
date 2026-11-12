@@ -25,7 +25,7 @@ and tells you which is which.
 
 | Check | What it establishes |
 |---|---|
-| 42 automated tests, including 16 acceptance tests specified in `SPEC.md` before the code was written | The maths, routing, settlement and leakage rules behave as specified |
+| 63 automated tests, including 16 acceptance tests specified in `SPEC.md` before the code was written | The maths, routing, settlement and leakage rules behave as specified, and the HTTP API never returns hidden fields before a round is settled |
 | Exact enumeration of all 2 x 1,024 possible rounds | Expected profit equals expected edge exactly, for the tested strategies |
 | Independent re-derivation with exact fractions (`tests/test_independent.py`), reproduced separately by another reviewer | The headline figures, for example +13.1515 per round for quoting one tick inside the rival |
 
@@ -39,9 +39,13 @@ cd market-makers-dilemma
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pytest -v              # runs all 42 tests (about a minute)
-streamlit run app.py   # opens the game in your browser
+pytest -v              # runs all 63 tests (about a minute)
+python server.py       # then open the address it prints, usually http://127.0.0.1:8000
 ```
+
+The website uses only the Python standard library on the server and plain JavaScript in the
+browser, so `server.py` needs no extra install. `requirements.txt` is for the tests and for the
+earlier Streamlit version (`streamlit run app.py`), which is kept for reference.
 
 If `pip install` fails on a very new Python (for example 3.15), create the environment with an
 older Python such as 3.12 or 3.13 instead.
@@ -54,9 +58,13 @@ older Python such as 3.12 or 3.13 instead.
 | `engine.py` | The maths (Bayes update, break-even quotes), the rival, routing, settlement, one round. |
 | `session.py` | A 10-round game: modes, seeds, totals, log. |
 | `coach.py` | The coach's wording. Never says "optimal"; never mentions the true value mid-round. |
-| `app.py` | The Streamlit page. It only draws what `session.py` gives it. |
+| `api.py` | The JSON layer the website talks to. It returns public state only. Hidden information (true value, who was informed) is released only after a round is settled. |
+| `server.py` | A small standard-library web server: serves `web/` and the `/api/*` endpoints. |
+| `web/` | The website: plain JavaScript, no framework. `app.js` (pages), `flap.js` (split-flap display), `arena.js` (quote rail), `market.js` (live demo), `sfx.js` (optional sound), `style.css`. |
+| `app.py` | The earlier Streamlit page, kept for reference. |
 | `strategies.py`, `simulate.py` | Simple fixed-rule bots, seeded simulations, and an **exact** calculation by enumerating every possible round. |
 | `tests/test_engine.py` | Spec tests T1 to T16, an exact check of Property E, and session tests. |
+| `tests/test_api.py`, `tests/test_frontend.py` | The HTTP API (including that hidden fields never appear before settlement) and static checks on the website files. |
 | `tests/test_independent.py` | Independent exact check of the section 10 figures using fractions, importing nothing from the engine. |
 
 ## Honest limitations
@@ -66,5 +74,5 @@ older Python such as 3.12 or 3.13 instead.
 - Informed traders ignore price. Trade direction does not depend on quotes by assumption.
 - A round has 10 trades, so realised profit is mostly luck. Judge yourself by expected edge.
 - The bots in `strategies.py` see the rival's next quote, which a human never sees. They are benchmarks, not model players.
-- The leakage tests cover the session data flow, not a real browser. Re-check before any public deployment.
+- The leakage tests cover the session data flow and the HTTP API responses, but not a deployed server or a real browser's network tab. Re-check before any public deployment.
 - Stage 1 assumes the rival and reference use the true informed share. Stage 2 will need that decided (SPEC F15).
