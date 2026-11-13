@@ -560,8 +560,8 @@ body::before { background:
 :root, [data-theme="day"] { --glow-b: rgba(30,200,145,.20); --glow-c: rgba(240,70,100,.15); }
 .story-head { position: sticky; top: 68px; z-index: 6; padding: 14px 0 10px; }
 .story-head h2 { margin-bottom: 4px; } .story-sub { margin: 0; }
-.story-head::before { content: ""; position: absolute; left: 50%; width: 100vw; transform: translateX(-50%); top: 0; bottom: 0; z-index: -1;
-  background: linear-gradient(var(--bg) 55%, transparent); opacity: .92; }
+.story-head::before { content: ""; position: absolute; left: 50%; width: 100vw; transform: translateX(-50%); top: -28px; bottom: 0; z-index: -1;
+  background: linear-gradient(transparent, var(--bg) 35%, var(--bg) 60%, transparent); opacity: .8; }
 @media (min-width: 1001px) {
   .story-steps, .story-vis { top: 186px; }
   .story-win { height: min(56vh, 480px); }
